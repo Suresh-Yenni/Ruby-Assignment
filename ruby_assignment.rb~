@@ -1,50 +1,29 @@
 array = [
-{"id" => 1, "dep" => "a1" , "math" => 43 , "phy" => 54 , "chem" => 65 ,"year"=>"2016"},
-{"id" => 2 , "dep" => "a1" , "math" => 66, "phy" => 52, "chem" => 65,"year"=>"2016"},
-{"id" => 3, "dep" => "a7" , "math" => 87, "phy" => 32, "chem" => 43,"year"=>"2016"},
-{"id" => 1, "dep" => "a1" , "math" => 21, "phy" => 52, "chem" => 65,"year"=>"2015"},
-{"id" => 2, "dep" => "a1" , "math" => 68, "phy" => 50, "chem" => 65,"year"=>"2015"},
-{"id" => 3, "dep" => "a7" , "math" => 85, "phy" => 22, "chem" => 43,"year"=>"2015"},
-{"id" => 4, "dep" => "a7" , "math" => 21, "phy" => 22, "chem" => 13,"year"=>"2016"}
+{"id" => 1, "dep" => "a1", "math" => 43, "phy" => 54, "chem" => 65, "year"=>"2016"},
+{"id" => 2, "dep" => "a1", "math" => 66, "phy" => 52, "chem" => 65, "year"=>"2016"},
+{"id" => 3, "dep" => "a7", "math" => 87, "phy" => 32, "chem" => 43, "year"=>"2016"},
+{"id" => 1, "dep" => "a1", "math" => 21, "phy" => 52, "chem" => 65, "year"=>"2015"},
+{"id" => 2, "dep" => "a1", "math" => 68, "phy" => 50, "chem" => 65, "year"=>"2015"},
+{"id" => 3, "dep" => "a7", "math" => 85, "phy" => 22, "chem" => 43, "year"=>"2015"},
+{"id" => 4, "dep" => "a7", "math" => 21, "phy" => 22, "chem" => 13, "year"=>"2016"}
 ]
 
 def sort_input(array, on)
     out = array.sort_by {|item| item[on] } 	
-    return out
 end
 
 def group_input(out, on)
-     puts out.inspect
      out = out.group_by { |item| item[on] }
-     puts out.inspect
-     return out
 end
 
-def give_key(index)
-    if index == 0
-        return "id"
-    elsif index == 1
-        return "dep"
-    elsif index == 2
-        return "math"
-    elsif index == 3
-        return "phy"
-    elsif index == 4
-        return "chem"
-    elsif index == 5
-        return "year"
-    end
-end
-
-def if_should_compare(input, out, compare, change)
+def get_compared(input, out, compare, give_key, change)
    current = 0
    past = 0
-   
    out.each do |x|
      hash = {}
      a=[]
      for index in 2...5
-       key = give_key(index)
+       key = give_key[index]
        x[1].each do |y|
           if y["year"] == compare[0]
                 current = y[key]
@@ -60,13 +39,13 @@ def if_should_compare(input, out, compare, change)
   return change
 end
 
-def if_total(input, out, compare, total)
+def get_total(input, out, compare, give_key, total)
    out.each do |x|
      hash = {}
      a=[]
      for index in 2...5
        tot = 0
-       key = give_key(index)
+       key = give_key[index]
        x[1].each do |y|
           if input[3] == "false"
              tot = tot + y[key]
@@ -82,13 +61,12 @@ def if_total(input, out, compare, total)
   return total
 end
 
-def for_display(out, change, total, input)
+def final_display(out, change, total, input)
   count = 0
   display = input[2].split(",")
   print "#{input[0]}      "
   display.each { |e| print "| #{e}  " }
   out.each do |x| 
-     puts x.inspect
      puts ""
      print "#{x[0]}"
      x[1].each do |y|
@@ -122,32 +100,42 @@ def for_display(out, change, total, input)
    puts ""
 end
 
-puts "group_by? sort_by? Diplay_fields? should_compare? show_total? "
-input = gets.chomp
-input = input.split(" ")
+def user_input(fields)
+  puts "group_by? sort_by? Diplay_fields? should_compare? show_total? "
+  input = gets.chomp
+  input = input.split(" ")
+  index = 0
+  fields.each do |key|
+      fields[key] = input[0]
+      index += 1
+  end
+end
 
-out = sort_input(array, input[1])
-out = group_input(out, input[0])
+give_key = {0 => "id", 1 => "dep", 2 => "math", 3 => "phy", 4 => "chem", 5 => "year"}
+fields = {"group_on" => "", "sort_on" => "", "display_fields" => [], "on_compare" => "", "on_total" => ""}
 
-puts out.inspect
+user_input(fields)
+
+out = sort_input(array, fields["sort_on"])
+out = group_input(out, fields["group_on"])
 
 compare=[]
 
-if input[3] == "true"
+if fields["on_compare"] == "true"
     change = []
     puts "First_compare_element? Second_compare_element? "
     compare = gets.chomp
     compare = compare.split(" ")
-    change = if_should_compare(input, out, compare, change)
+    change = get_compared(fields, out, compare, give_key, change)
 end
 
-if input[4] == "true"
+if fields["on_total"] == "true"
    total = []
-   total = if_total(input, out, compare, total)
+   total = get_total(fields, out, compare, give_key, total)
 end
 
 puts ""
-for_display(out, change, total, input)
+final_display(out, change, total, fields)
 
 
 
