@@ -9,15 +9,6 @@ input_array = [
   {"id" => 4, "dep" => "a7", "math" => 21, "phy" => 22, "chem" => 13, "year"=>"2016"}
 ]
 
-
-## Naming convention for methods and variables
-## Variable Scopes (Global,local, constants, class level etc)
-## Class methods ?
-## Modules
-## require vs include
-## Add comments
-## Move all logic into functions
-
 ## method sorts the passed input array depending on passed elementand returns
 def sort_input(input_array, on_element)
     input_array.sort_by {|item| item[on_element] }
@@ -160,4 +151,4 @@ def start(input_array)
 
 end
 
-start(input_array)
+start(input_array,param)
