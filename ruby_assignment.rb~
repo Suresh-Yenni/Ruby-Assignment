@@ -1,143 +1,154 @@
-array = [
-{"id" => 1, "dep" => "a1", "math" => 43, "phy" => 54, "chem" => 65, "year"=>"2016"},
-{"id" => 2, "dep" => "a1", "math" => 66, "phy" => 52, "chem" => 65, "year"=>"2016"},
-{"id" => 3, "dep" => "a7", "math" => 87, "phy" => 32, "chem" => 43, "year"=>"2016"},
-{"id" => 1, "dep" => "a1", "math" => 21, "phy" => 52, "chem" => 65, "year"=>"2015"},
-{"id" => 2, "dep" => "a1", "math" => 68, "phy" => 50, "chem" => 65, "year"=>"2015"},
-{"id" => 3, "dep" => "a7", "math" => 85, "phy" => 22, "chem" => 43, "year"=>"2015"},
-{"id" => 4, "dep" => "a7", "math" => 21, "phy" => 22, "chem" => 13, "year"=>"2016"}
+$ID_ATTRIBUTES = {0 => "id", 1 => "dep", 2 => "math", 3 => "phy", 4 => "chem", 5 => "year"}
+input_array = [
+  {"id" => 1, "dep" => "a1", "math" => 43, "phy" => 54, "chem" => 65, "year"=>"2016"},
+  {"id" => 2, "dep" => "a1", "math" => 66, "phy" => 52, "chem" => 65, "year"=>"2016"},
+  {"id" => 3, "dep" => "a7", "math" => 87, "phy" => 32, "chem" => 43, "year"=>"2016"},
+  {"id" => 1, "dep" => "a1", "math" => 21, "phy" => 52, "chem" => 65, "year"=>"2015"},
+  {"id" => 2, "dep" => "a1", "math" => 68, "phy" => 50, "chem" => 65, "year"=>"2015"},
+  {"id" => 3, "dep" => "a7", "math" => 85, "phy" => 22, "chem" => 43, "year"=>"2015"},
+  {"id" => 4, "dep" => "a7", "math" => 21, "phy" => 22, "chem" => 13, "year"=>"2016"}
 ]
 
-def sort_input(array, on)
-    out = array.sort_by {|item| item[on] } 	
+## method sorts the passed input array depending on passed elementand returns
+def sort_input(input_array, on_element)
+    input_array.sort_by {|item| item[on_element] }
 end
 
-def group_input(out, on)
-     out = out.group_by { |item| item[on] }
+## method groups the passed input array depending on passed element and returns
+def group_input(input_array, on_element)
+    input_array.group_by { |item| item[on_element] }
 end
 
-def get_compared(input, out, compare, give_key, change)
-   current = 0
-   past = 0
-   out.each do |x|
-     hash = {}
-     a=[]
+## method does comparison of marks during the years passed in arugements
+## and return array of row for each group in input array
+def comparing_marks(input_array, years_to_compare, change_in_marks)
+   first_year = 0
+   second_year = 0
+   input_array.each do |input_array_row|
+     row_of_hash = {}
+     row_of_array=[]
      for index in 2...5
-       key = give_key[index]
-       x[1].each do |y|
-          if y["year"] == compare[0]
-                current = y[key]
-          elsif y["year"] == compare[1]
-                past = y[key]
+       key = $ID_ATTRIBUTES[index]
+       input_array_row[1].each do |input_array_col|
+          if input_array_col["year"] == years_to_compare[0]
+                first_year = input_array_col[key]
+          elsif input_array_col["year"] == years_to_compare[1]
+                second_year = input_array_col[key]
           end
        end
-       hash[key] = "#{(current-past)}"
+       row_of_hash[key] = "#{(first_year-second_year)}"
      end
-    a.push(hash)
-    change.push(a)
+    row_of_array.push(row_of_hash)
+    change_in_marks.push(row_of_array)
    end
-  return change
+  return change_in_marks
 end
 
-def get_total(input, out, compare, give_key, total)
-   out.each do |x|
-     hash = {}
-     a=[]
+## method totals the marks of all years if no comparison was asked or
+## else totals the marks of years been passed and return array of row for each group in input aaray
+def getting_totals(should_compare, input_array, years_to_compare, total_marks)
+   input_array.each do |input_array_row|
+     row_of_hash = {}
+     row_of_array = []
      for index in 2...5
-       tot = 0
-       key = give_key[index]
-       x[1].each do |y|
-          if input[3] == "false"
-             tot = tot + y[key]
-          elsif (y["year"] == compare[0]) || (y["year"] == compare[1])
-             tot = tot + y[key]
+       total = 0
+       key = $ID_ATTRIBUTES[index]
+       input_array_row[1].each do |input_array_col|
+          if should_compare == "false"
+             total = total + input_array_col[key]
+          elsif (input_array_col["year"] == years_to_compare[0]) || (input_array_col["year"] == years_to_compare[1])
+             total = total + input_array_col[key]
           end
        end
-       hash[key] = tot
+       row_of_hash[key] = total
      end
-    a.push(hash)
-    total.push(a)
+    row_of_array.push(row_of_hash)
+    total_marks.push(row_of_array)
    end
-  return total
+  return total_marks
 end
 
-def final_display(out, change, total, input)
-  count = 0
-  display = input[2].split(",")
-  print "#{input[0]}      "
-  display.each { |e| print "| #{e}  " }
-  out.each do |x| 
+## method displayes the row related to change in marks if comparison was asked
+## and displayes the row related to total if total was asked
+def display_row(comparison_or_total, labels_key, change_or_total_marks, display_fields, index)
+  puts ""
+  labels = {
+    "on_compare" => "Change     ",
+    "on_total" => "Topic      "
+  }
+
+  if comparison_or_total == "true"
+    print labels[labels_key]
+    change_or_total_marks[index].each do |cols|
+      print "#{cols["math"]}     " if display_fields.include? "math"
+      print "#{cols["phy"]}     " if display_fields.include? "phy"
+      print "#{cols["chem"]}" if display_fields.include? "chem"
+    end
+  end
+end
+
+## method displayes required output on screen
+def displaying_output(input_array, change_in_marks, total_marks, display_fields,should_compare , should_total)
+  index = 0
+  display_fields = display_fields.split(",")
+  print "#{input_array[0]}      "
+  display_fields.each { |e| print "| #{e}  " }
+  input_array.each do |input_array_row|
      puts ""
-     print "#{x[0]}"
-     x[1].each do |y|
+     print "#{input_array_row[0]}"
+     input_array_row[1].each do |input_array_col|
        puts ""
-       print "#{y["year"]}       "
-       print "#{y["math"]}     " if display.include? "math" 
-       print "#{y["phy"]}      " if display.include? "phy"
-       print "#{y["chem"]}     " if display.include? "chem"
+       print "#{input_array_col["year"]}       "
+       print "#{input_array_col["math"]}     " if display_fields.include? "math"
+       print "#{input_array_col["phy"]}      " if display_fields.include? "phy"
+       print "#{input_array_col["chem"]}     " if display_fields.include? "chem"
      end
-     puts ""
-     if input[3] == "true"
-       print "Change     "
-       change[count].each do |f|
-         print "#{f["math"]}     " if display.include? "math" 
-         print "#{f["phy"]}     " if display.include? "phy"
-         print "#{f["chem"]}" if display.include? "chem"
-       end
-     end
-     puts ""
-     if input[4] == "true"
-       print "Topic      "
-       total[count].each do |u|
-         print "#{u["math"]}     " if display.include? "math" 
-         print "#{u["phy"]}     " if display.include? "phy"
-         print "#{u["chem"]}" if display.include? "chem"
-       end
-     end
-     count += 1
+     display_row(should_compare, "on_compare", change_in_marks, display_fields, index)
+     display_row(should_total, "on_total", total_marks, display_fields, index)
+     index += 1
      puts ""
    end
    puts ""
 end
 
+## method asks user to input fields to processed
 def user_input(fields)
-  puts "group_by? sort_by? Diplay_fields? should_compare? show_total? "
-  input = gets.chomp
-  input = input.split(" ")
+
   index = 0
-  fields.each do |key|
-      fields[key] = input[0]
+  fields.each do |k, v|
+      fields[k] = input[index]
       index += 1
   end
 end
 
-give_key = {0 => "id", 1 => "dep", 2 => "math", 3 => "phy", 4 => "chem", 5 => "year"}
-fields = {"group_on" => "", "sort_on" => "", "display_fields" => [], "on_compare" => "", "on_total" => ""}
+## program start with call to this method
+def start(input_array)
 
-user_input(fields)
+  puts "group_by? sort_by? Diplay_fields? should_compare? show_total? "
+  input = gets.chomp
+  group_on, sort_on, display_fields, should_compare, should_total = input.split(" ")
 
-out = sort_input(array, fields["sort_on"])
-out = group_input(out, fields["group_on"])
+  input_array = sort_input(input_array, sort_on)
+  input_array = group_input(input_array, group_on)
 
-compare=[]
+  years_to_compare = []
 
-if fields["on_compare"] == "true"
-    change = []
-    puts "First_compare_element? Second_compare_element? "
-    compare = gets.chomp
-    compare = compare.split(" ")
-    change = get_compared(fields, out, compare, give_key, change)
+  if should_compare == "true"
+      change_in_marks = []
+      puts "First_compare_year? Second_compare_year? "
+      years_to_compare = gets.chomp
+      years_to_compare = years_to_compare.split(" ")
+      change_in_marks = comparing_marks(input_array, years_to_compare, change_in_marks)
+  end
+
+  if should_total == "true"
+     total_marks = []
+     total_marks = getting_totals(should_compare, input_array, years_to_compare, total_marks)
+  end
+
+  puts ""
+  displaying_output(input_array, change_in_marks, total_marks, display_fields, should_compare, should_total)
+
 end
 
-if fields["on_total"] == "true"
-   total = []
-   total = get_total(fields, out, compare, give_key, total)
-end
-
-puts ""
-final_display(out, change, total, fields)
-
-
-
-     
-
+start(input_array,param)
