@@ -25,7 +25,6 @@ def compare_marks!(change_in_marks, input_array, years_to_compare, display_field
    second_year = 0
    input_array.each do |grp_on, input_array_rows|
      marks_row = {}
-     marks_rows = []
      display_fields.each do |key|
        input_array_rows.each do |row|
           if row["year"] == years_to_compare["first"]
